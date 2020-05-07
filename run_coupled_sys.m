@@ -63,12 +63,10 @@ HJIextraArgs.visualize.deleteLastPlot = true; %delete previous plot as you updat
 % HJIPDE_solve(data0, tau, schemeData, minWith, extraArgs)
 [value_function, tau2, ~] = ...
   HJIPDE_solve(data0, tau, schemeData, minWidth, HJIextraArgs);
-[gradient, ~, ] = computeGradients(g, value_function);
+[~, gradient, ~] = computeGradients(g, value_function);
 
 value_function_file = sprintf("../reachibility/value_function_%dD.csv", ndim);
 writematrix(value_function, value_function_file);
-grid_file = sprintf("../reachibility/grid_%dD.csv", ndim);
-writematrix(value_function, grid_file);
 gradient_file = sprintf("../reachibility/gradient_%dD.csv", ndim);
-writematrix(value_function, gradient_file);
+writematrix(gradient, gradient_file);
 end
