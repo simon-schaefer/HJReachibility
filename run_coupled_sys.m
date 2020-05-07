@@ -15,6 +15,7 @@ n = 41;
 grid_min = [ones(ndim,1) * x_min; ones(ndim,1) * v_min_robot]';
 grid_max = [ones(ndim,1) * x_max; ones(ndim,1) * v_max_robot]';
 N = ones(2 * ndim, 1) * n;
+
 g = createGrid(grid_min, grid_max, N);
 
 %% target set
@@ -57,17 +58,18 @@ schemeData.dMode = dMode;
 HJIextraArgs.visualize.valueSet = 1;
 HJIextraArgs.visualize.initialValueSet = 1;
 HJIextraArgs.visualize.figNum = 1; %set figure number
-HJIextraArgs.visualize.deleteLastPlot = true; %delete previous plot as you update
+HJIextraArgs.visualize.deleteLastPlot = true; %delete previous plot
 
 %[data, tau, extraOuts] = ...c
 % HJIPDE_solve(data0, tau, schemeData, minWith, extraArgs)
-[value_function, tau2, ~] = ...
+[value_function, tau, ~] = ...
   HJIPDE_solve(data0, tau, schemeData, minWidth, HJIextraArgs);
 [~, gradient, ~] = computeGradients(g, value_function);
 
 %% Write results to pickle files
-value_function_file = sprintf("../reachibility/value_function_%dD.csv", ndim);
-writematrix(reshape(value_function,1,[]), value_function_file);
-gradient_file = sprintf("../reachibility/gradient_%dD.csv", ndim);
-writematrix(reshape(gradient,1,[]), gradient_file);
+output_file = sprintf("../reachibility/%dD.mat", ndim);
+value_function_flat = reshape(value_function, 1, []);
+gradient_flat = reshape(gradient, 1, []);
+save(output_file, 'grid_min', 'grid_max', 'N', ...
+    'gradient_flat', 'tau', 'value_function_flat');
 end
