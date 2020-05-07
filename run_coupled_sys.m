@@ -1,7 +1,7 @@
 function run_coupled_sys()
  
 %% Environment parameters
-ndim = 1;
+ndim = 2;
 
 x_min = -10;
 x_max = 10;
@@ -65,8 +65,9 @@ HJIextraArgs.visualize.deleteLastPlot = true; %delete previous plot as you updat
   HJIPDE_solve(data0, tau, schemeData, minWidth, HJIextraArgs);
 [~, gradient, ~] = computeGradients(g, value_function);
 
+%% Write results to pickle files
 value_function_file = sprintf("../reachibility/value_function_%dD.csv", ndim);
-writematrix(value_function, value_function_file);
+writematrix(reshape(value_function,1,[]), value_function_file);
 gradient_file = sprintf("../reachibility/gradient_%dD.csv", ndim);
-writematrix(gradient, gradient_file);
+writematrix(reshape(gradient,1,[]), gradient_file);
 end
