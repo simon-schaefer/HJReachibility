@@ -1,4 +1,4 @@
-function dOpt = optDstb(obj, ~, ~, deriv, dMode)
+function dOpt = optDstb(obj, ~, x, ~, dMode)
 % dOpt = optCtrl(obj, t, y, deriv, dMode)
 
 %% Input processing
@@ -6,28 +6,23 @@ if nargin < 5
   dMode = 'max';
 end
 
-if ~iscell(deriv)
-  deriv = num2cell(deriv);
+if ~iscell(x)
+  x = num2cell(x);
 end
 
 dOpt = cell(obj.nd, 1);
 
 %% Optimal control
 if strcmp(dMode, 'max')
-  for i = 1:2
-    if any(obj.dims == i)
-      dOpt{i} = (deriv{obj.dims==i}>=0)*obj.dRange{1}(i) + ...
-        (deriv{obj.dims==i}<0)*(obj.dRange{2}(i));
+    for i = 1:obj.nd
+        dOpt{i} = (x{i}>=0)*obj.dRange{2}(i)+(x{i}<0)*(obj.dRange{1}(i));
     end
-  end
-
+    
 elseif strcmp(dMode, 'min')
-  for i = 1:2
-    if any(obj.dims == i)
-      dOpt{i} = (deriv{obj.dims==i}>=0)*(obj.dRange{2}(i)) + ...
-        (deriv{obj.dims==i}<0)*obj.dRange{1}(i);
+    for i = 1:obj.nd
+        dOpt{i} = (x{i}>=0)*(obj.dRange{1}(i))+(x{i}<0)*obj.dRange{2}(i);
     end
-  end
+  
 else
   error('Unknown dMode!')
 end

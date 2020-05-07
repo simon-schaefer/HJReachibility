@@ -1,5 +1,8 @@
 classdef CoupledSys < DynSys
-  properties    
+  properties  
+    % Number of dimensions in position space (1D, 2D, 3D, ...)
+    ndim
+      
     % Acceleartion
     aRange
       
@@ -11,11 +14,11 @@ classdef CoupledSys < DynSys
   end
   
   methods
-    function obj = CoupledSys(x, aRange, dRange, dims)
-      % obj = CoupledSys(x, wMax, speed, dMax, dims)
+    function obj = CoupledSys(x, ndim, aRange, dRange, dims)
+      % obj = CoupledSys2D(x, wMax, speed, dMax, dims)
       %     Two-Agent coupled system 
       %
-      % Dynamics:
+      % Dynamics (exampled ndim = 2):
       %    \dot{x}_1 = vx + d1
       %    \dot{x}_2 = vy + d2
       %    \dot{x}_3 = ax
@@ -25,8 +28,8 @@ classdef CoupledSys < DynSys
       %
       % Inputs:
       %   x      - state: [xpos; ypos]
+      %   ndim   - number of dimensions (usually 1, 2)
       %   aRange - maximum acceleration
-      %   velocity - 2D velocity vector 
       %   dMax   - disturbance  nds
       %
       % Output:
@@ -40,18 +43,18 @@ classdef CoupledSys < DynSys
         x = x';
       end
       
-      if nargin < 2
+      if nargin < 3
         aRange = [-1 1];
       end
-      
-      if nargin < 3
-        dRange = {[0; 0]; [0; 0]};
-      end
-      
+       
       if nargin < 4
-        dims = 1:4;
+        dRange = {zeros(ndim); zeros(ndim)};
       end
-
+      
+      if nargin < 5
+        dims = 1:2*ndim;
+      end
+ 
       if numel(aRange) < 2
         aRange = [-aRange; aRange];
       end
@@ -61,11 +64,12 @@ classdef CoupledSys < DynSys
       end
       
       % Basic vehicle properties
-      obj.pdim = [find(dims == 1) find(dims == 2)]; % Position dimensions
-      obj.vdim = [find(dims == 3) find(dims == 4)]; % Velocity dimensions
+      obj.pdim = 1:ndim; % Position dimensions
+      obj.vdim = ndim+1:2*ndim; % Velocity dimensions
+      obj.ndim = ndim;
       obj.nx = length(dims);
-      obj.nu = 2;
-      obj.nd = 2;
+      obj.nu = ndim;
+      obj.nd = ndim;
       
       obj.x = x;
       obj.xhist = obj.x;
