@@ -3,8 +3,8 @@ function run_coupled_sys()
 %% Environment parameters
 ndim = 2;
 
-x_min = -10;
-x_max = 10;
+x_min = -20;
+x_max = 20;
 v_min_robot = -2; 
 v_max_robot = 2;
 a_max_robot = 2;
@@ -26,7 +26,7 @@ data0 = shapeCylinder(g, ndim+1:2*ndim, zeros(ndim), R);
 %% time vectors
 t0 = 0;
 tMax = 2.0;
-dt = 0.2;
+dt = 0.4;
 tau = t0:dt:tMax;
 
 %% problem parameters
@@ -64,10 +64,10 @@ HJIextraArgs.visualize.deleteLastPlot = true; %delete previous plot
 % HJIPDE_solve(data0, tau, schemeData, minWith, extraArgs)
 [value_function, tau, ~] = ...
   HJIPDE_solve(data0, tau, schemeData, minWidth, HJIextraArgs);
-[~, gradient, ~] = computeGradients(g, value_function);
+[gradient, ~, ~] = computeGradients(g, value_function);
 
 %% Write results to pickle files
-output_file = sprintf("../reachibility/%dD.mat", ndim);
+output_file = sprintf("../reachability/%dD.mat", ndim);
 value_function_flat = reshape(value_function, 1, []);
 gradient_flat = reshape(gradient, 1, []);
 save(output_file, 'grid_min', 'grid_max', 'N', ...
