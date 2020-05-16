@@ -1,0 +1,3 @@
+[submodule "lwpr"]
+	path = lwpr
+	url = https://github.com/jdlangs/lwpr

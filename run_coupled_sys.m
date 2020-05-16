@@ -9,7 +9,7 @@ v_min_robot = -2;
 v_max_robot = 2;
 a_max_robot = 2;
 v_max_single = 4;
-n = 41;
+n = 11;
 
 %% Grid (isotropic)
 grid_min = [ones(ndim,1) * x_min; ones(ndim,1) * v_min_robot]';
@@ -17,6 +17,7 @@ grid_max = [ones(ndim,1) * x_max; ones(ndim,1) * v_max_robot]';
 N = ones(2 * ndim, 1) * n;
 
 g = createGrid(grid_min, grid_max, N);
+
 
 %% target set
 R = 1;
@@ -66,10 +67,11 @@ HJIextraArgs.visualize.deleteLastPlot = true; %delete previous plot
   HJIPDE_solve(data0, tau, schemeData, minWidth, HJIextraArgs);
 [gradient, ~, ~] = computeGradients(g, value_function);
 
-%% Write results to pickle files
+%% Write results to mat file
 output_file = sprintf("../reachability/%dD.mat", ndim);
 value_function_flat = reshape(value_function, 1, []);
 gradient_flat = reshape(gradient, 1, []);
 save(output_file, 'grid_min', 'grid_max', 'N', ...
+    'value_function', 'gradient', ...
     'gradient_flat', 'tau', 'value_function_flat');
 end
