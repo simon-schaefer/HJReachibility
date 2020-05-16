@@ -65,13 +65,10 @@ HJIextraArgs.visualize.deleteLastPlot = true; %delete previous plot
 % HJIPDE_solve(data0, tau, schemeData, minWith, extraArgs)
 [value_function, tau, ~] = ...
   HJIPDE_solve(data0, tau, schemeData, minWidth, HJIextraArgs);
-[gradient, ~, ~] = computeGradients(g, value_function);
+[gradients, ~, ~] = computeGradients(g, value_function);
 
 %% Write results to mat file
 output_file = sprintf("../reachability/%dD.mat", ndim);
-value_function_flat = reshape(value_function, 1, []);
-gradient_flat = reshape(gradient, 1, []);
 save(output_file, 'grid_min', 'grid_max', 'N', ...
-    'value_function', 'gradient', ...
-    'gradient_flat', 'tau', 'value_function_flat');
+    'value_function', 'gradients', 'tau');
 end
