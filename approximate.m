@@ -1,9 +1,10 @@
 function approximate()
 %% Data loading
-ndim = 2;
-data_file = "../reachability/1D.mat";
-output_file = "../reachability/1D_app.mat";
-up_scaling = 8;
+ndim = 4;
+data_file = "../reachability/2D.mat";
+model_file = "../reachability/2D_model.mat";
+output_file = "../reachability/2D_app.mat";
+up_scaling = 4;
 training_steps = 10;
 
 % (Re-)Create grid points from data.
@@ -21,64 +22,64 @@ Xp = makegrid(grid_min, grid_max, N, ndim);
 tic
 
 %% LWPR initialization
-model = lwpr_init(ndim, 1, 'name', 'value_function_approximation');
-model = lwpr_set(model,'init_D', eye(ndim)*25);    
-model = lwpr_set(model,'init_alpha', ones(ndim)*250);
-model = lwpr_set(model,'diag_only',0);
-model = lwpr_set(model,'w_gen', 0.2);
-% model = lwpr_set(model,'w_prune', 0.7);   
-model = lwpr_set(model,'diag_only', 0);   
-model = lwpr_set(model,'meta', 1);
-model = lwpr_set(model,'meta_rate', 250);
-model = lwpr_set(model,'kernel', 'Gaussian');  
-% model = lwpr_set(model,'update_D', 1);
-
-% Transfer model into mex-internal storage
-model = lwpr_storage('Store', model);
-
-%% Model training
-nmse = zeros(training_steps, 1);
-f = waitbar(0, 'Training model ...');
-for j = 1:training_steps
-   inds = randperm(n);
-
-   mse = 0;
-   for i=1:n
-       waitbar(i/n, f, sprintf('Training (%d / %d) ==> %d / %d ...', ...
-                                j, training_steps, i, n));
-	   [model, yp, ~] = lwpr_update(model,X(inds(i),:)',Y(inds(i),:)');         
-	   mse = mse + (Y(inds(i),:)-yp).^2;
-   end
-
-   nMSE = mse/n/var(Y,1);
-   fprintf(1, '#Data=%d #rfs=%d nMSE=%5.3f\n', ...
-           lwpr_num_data(model), lwpr_num_rfs(model), nMSE);
-   %if exist('fflush') % for Octave output only
-   %   fflush(1);
-   %end   
-   nmse(j) = nMSE;
-end
-close(f);
-
+% model = lwpr_init(ndim, 1, 'name', 'value_function_approximation');
+% model = lwpr_set(model,'init_D', eye(ndim)*25);    
+% model = lwpr_set(model,'init_alpha', ones(ndim)*250);
+% model = lwpr_set(model,'diag_only',0);
+% model = lwpr_set(model,'w_gen', 0.2);
+% % model = lwpr_set(model,'w_prune', 0.7);   
+% model = lwpr_set(model,'diag_only', 0);   
+% model = lwpr_set(model,'meta', 1);
+% model = lwpr_set(model,'meta_rate', 250);
+% model = lwpr_set(model,'kernel', 'Gaussian');  
+% % model = lwpr_set(model,'update_D', 1);
+% 
+% % Transfer model into mex-internal storage
+% model = lwpr_storage('Store', model);
+% 
+% %% Model training
+% nmse = zeros(training_steps, 1);
+% f = waitbar(0, 'Training model ...');
+% for j = 1:training_steps
+%    inds = randperm(n);
+% 
+%    mse = 0;
+%    for i=1:n
+%        waitbar(i/n, f, sprintf('Training (%d / %d) ==> %d / %d ...', ...
+%                                 j, training_steps, i, n));
+% 	   [model, yp, ~] = lwpr_update(model,X(inds(i),:)',Y(inds(i),:)');         
+% 	   mse = mse + (Y(inds(i),:)-yp).^2;
+%    end
+% 
+%    nMSE = mse/n/var(Y,1);
+%    fprintf(1, '#Data=%d #rfs=%d nMSE=%5.3f\n', ...
+%            lwpr_num_data(model), lwpr_num_rfs(model), nMSE);
+%    %if exist('fflush') % for Octave output only
+%    %   fflush(1);
+%    %end   
+%    nmse(j) = nMSE;
+% end
+% close(f);
+% toc
+% 
+% %% Write model to mat file
+% save(model_file, 'model');
+load(model_file, 'model');
 
 %% Model predictions
-Yp = zeros(size(Xp, 1), size(Yt, 2));
-NXp = length(Xp);
-f = waitbar(0, 'Predicting ...');
-for i=1:NXp
-    waitbar(i/NXp, f, sprintf('Predicting %d / %d ...', i, NXp));
-	[yp, ~] = lwpr_predict(model, Xp(i,:)', 0.001);
-	Yp(i,1) = yp;
-end
-close(f);
-% [yp, ~] = lwpr_predict(model, Xp', 0.001);
-% Yp = yp';
-
+tic
+Yp = lwpr_predict(model, Xp', 0.001)';
 toc
 
 %% Model cleanup
 % Transfer model back from mex-internal storage
 model = lwpr_storage('GetFree', model);
+
+%% Write results to mat file
+value_function = Yp;
+value_function_flat = reshape(Yp, 1, []);
+save(output_file, 'grid_min', 'grid_max', 'N', ...
+    'value_function', 'value_function_flat');
 
 %% Plotting output data
 figure(1);
@@ -125,21 +126,14 @@ end
 hold off;
 axis('equal');
 title('Projected input space view of RFs');
-% stitle('Input space view of RFs');
+stitle('Input space view of RFs');
 
-%% Plotting training
+% Plotting training
 figure(2);
 plot(log(nmse));
 xlabel('Iteration');
 ylabel('Log(nMSE)');
 title('nMSE');
-
-%% Write results to mat file
-value_function = Yp;
-value_function_flat = reshape(Yp, 1, []);
-save(output_file, 'grid_min', 'grid_max', 'N', ...
-    'value_function', 'value_function_flat');
-
 
 % -------------------------------------------------------------------------
 function X = makegrid(grid_min, grid_max, N, ndim)
