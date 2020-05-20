@@ -9,12 +9,11 @@ v_min_robot = -2;
 v_max_robot = 2;
 a_max_robot = 2;
 v_max_single = 4;
-n = 11;
+N = [81; 81; 21; 21];
 
 %% Grid (isotropic)
 grid_min = [ones(ndim,1) * x_min; ones(ndim,1) * v_min_robot]';
 grid_max = [ones(ndim,1) * x_max; ones(ndim,1) * v_max_robot]';
-N = ones(2 * ndim, 1) * n;
 
 g = createGrid(grid_min, grid_max, N);
 
