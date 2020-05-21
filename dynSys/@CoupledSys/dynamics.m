@@ -1,7 +1,7 @@
 function dx = dynamics(obj, ~, x, u, d)
 % Dynamics of the Coupled System (exampled ndim = 2)
-      %    \dot{x}_1 = vx + d1
-      %    \dot{x}_2 = vy + d2
+      %    \dot{x}_1 = vx - d1
+      %    \dot{x}_2 = vy - d2
       %    \dot{x}_3 = ax
       %    \dot{x}_4 = ay
 %   Control: u = ax, ay;
@@ -18,7 +18,7 @@ if iscell(x)
 else
   dx = zeros(obj.nx, 1);
   
-  dx(1:ndim) = x(ndim+1:end) + d;
+  dx(1:ndim) = x(ndim+1:end) - d;
   dx(ndim+1:end) = u;
 end
 end
@@ -26,7 +26,7 @@ end
 function dx = dynamics_cell_helper(obj, x, u, d, dim)
 
 if dim <= obj.ndim
-    dx = x{dim + obj.ndim} + d{dim};
+    dx = x{dim + obj.ndim} - d{dim};
 else
     dx = u{dim - obj.ndim};
 end

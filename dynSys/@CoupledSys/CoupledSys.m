@@ -19,8 +19,8 @@ classdef CoupledSys < DynSys
       %     Two-Agent coupled system 
       %
       % Dynamics (exampled ndim = 2):
-      %    \dot{x}_1 = vx + d1
-      %    \dot{x}_2 = vy + d2
+      %    \dot{x}_1 = vx - d1
+      %    \dot{x}_2 = vy - d2
       %    \dot{x}_3 = ax
       %    \dot{x}_4 = ay
       %         u \in [-aMax, aMax]

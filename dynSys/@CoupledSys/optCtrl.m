@@ -1,4 +1,4 @@
-function uOpt = optCtrl(obj, ~, x, ~, uMode)
+function uOpt = optCtrl(obj, ~, ~, deriv, uMode)
 % uOpt = optCtrl(obj, t, x, deriv, uMode)
 
 %% Input processing
@@ -6,8 +6,8 @@ if nargin < 5
   uMode = 'min';
 end
 
-if ~iscell(x)
-  x = num2cell(x);
+if ~iscell(deriv)
+  deriv = num2cell(deriv);
 end
 
 uOpt = cell(obj.nu, 1);
@@ -20,12 +20,12 @@ Rmax = 1;
 % positive direction, and vice versa.
 if strcmp(uMode, 'max')
     for i = 1:obj.nu
-        uOpt{i} = (x{i}>=0)*(obj.aRange(2))+(x{i}<0)*obj.aRange(1);
+        uOpt{i} = (deriv{i}>=0)*(obj.aRange(2))+(deriv{i}<0)*obj.aRange(1);
     end
     
 elseif strcmp(uMode, 'min')
     for i = 1:obj.nu
-        uOpt{i} = (x{i}>=0)*(obj.aRange(2))+(x{i}<0)*obj.aRange(1);
+        uOpt{i} = (deriv{i}>=0)*(obj.aRange(2))+(deriv{i}<0)*obj.aRange(1);
     end 
     
 else

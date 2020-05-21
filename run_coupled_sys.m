@@ -2,6 +2,7 @@ function run_coupled_sys()
  
 %% Environment parameters
 ndim = 2;
+N = [41; 41; 21; 21];
 
 x_min = -20;
 x_max = 20;
@@ -9,14 +10,12 @@ v_min_robot = -2;
 v_max_robot = 2;
 a_max_robot = 2;
 v_max_single = 4;
-N = [81; 81; 21; 21];
 
 %% Grid (isotropic)
 grid_min = [ones(ndim,1) * x_min; ones(ndim,1) * v_min_robot]';
 grid_max = [ones(ndim,1) * x_max; ones(ndim,1) * v_max_robot]';
 
 g = createGrid(grid_min, grid_max, N);
-
 
 %% target set
 R = 1;
