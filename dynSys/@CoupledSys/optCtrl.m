@@ -18,6 +18,10 @@ Rmax = 1;
 % Then in order to avoid it at every case try to distance yourself from 
 % it as best as possible, i.e. when you are positive accelerate in further 
 % positive direction, and vice versa.
+% This is also the result of the mathematical formulation:
+% d/du \nabla V * f(x, d) = dV3 ux + dV4 uy
+% so that we maximize this equation when u has the same sign and maximal
+% absolute value as dVi (dVi = ith component of value function gradient). 
 if strcmp(uMode, 'max')
     for i = 1:obj.nu
         uOpt{i} = (deriv{i}>=0)*(obj.aRange(2))+(deriv{i}<0)*obj.aRange(1);
