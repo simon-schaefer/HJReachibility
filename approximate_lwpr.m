@@ -1,4 +1,4 @@
-function approximate()
+function approximate_lwpr()
 %% Data loading
 ndim = 4;
 data_file = "../reachability/2D.mat";
@@ -9,62 +9,62 @@ training_steps = 10;
 
 % (Re-)Create grid points from data.
 load(data_file, 'grid_min', 'grid_max', 'N', 'value_function');
-X = makegrid(grid_min, grid_max, N, ndim);
-Y = makevalues(value_function, ndim);
+X = makeGrid(grid_min, grid_max, N, ndim);
+Y = makeValues(value_function, ndim);
 Xt = X; 
 Yt = Y;
 [n, ~] = size(X);
 
 % Create up-scaled grid points for prediction later on.
 N = up_scaling*N;
-Xp = makegrid(grid_min, grid_max, N, ndim);
+Xp = makeGrid(grid_min, grid_max, N, ndim);
 
 tic
 
 %% LWPR initialization
-% model = lwpr_init(ndim, 1, 'name', 'value_function_approximation');
-% model = lwpr_set(model,'init_D', eye(ndim)*25);    
-% model = lwpr_set(model,'init_alpha', ones(ndim)*250);
-% model = lwpr_set(model,'diag_only',0);
-% model = lwpr_set(model,'w_gen', 0.2);
-% % model = lwpr_set(model,'w_prune', 0.7);   
-% model = lwpr_set(model,'diag_only', 0);   
-% model = lwpr_set(model,'meta', 1);
-% model = lwpr_set(model,'meta_rate', 250);
-% model = lwpr_set(model,'kernel', 'Gaussian');  
-% % model = lwpr_set(model,'update_D', 1);
-% 
-% % Transfer model into mex-internal storage
-% model = lwpr_storage('Store', model);
-% 
-% %% Model training
-% nmse = zeros(training_steps, 1);
-% f = waitbar(0, 'Training model ...');
-% for j = 1:training_steps
-%    inds = randperm(n);
-% 
-%    mse = 0;
-%    for i=1:n
-%        waitbar(i/n, f, sprintf('Training (%d / %d) ==> %d / %d ...', ...
-%                                 j, training_steps, i, n));
-% 	   [model, yp, ~] = lwpr_update(model,X(inds(i),:)',Y(inds(i),:)');         
-% 	   mse = mse + (Y(inds(i),:)-yp).^2;
-%    end
-% 
-%    nMSE = mse/n/var(Y,1);
-%    fprintf(1, '#Data=%d #rfs=%d nMSE=%5.3f\n', ...
-%            lwpr_num_data(model), lwpr_num_rfs(model), nMSE);
-%    %if exist('fflush') % for Octave output only
-%    %   fflush(1);
-%    %end   
-%    nmse(j) = nMSE;
-% end
-% close(f);
-% toc
-% 
-% %% Write model to mat file
-% save(model_file, 'model');
-load(model_file, 'model');
+model = lwpr_init(ndim, 1, 'name', 'value_function_approximation');
+model = lwpr_set(model,'init_D', eye(ndim)*25);    
+model = lwpr_set(model,'init_alpha', ones(ndim)*250);
+model = lwpr_set(model,'diag_only',0);
+model = lwpr_set(model,'w_gen', 0.2);
+% model = lwpr_set(model,'w_prune', 0.7);   
+model = lwpr_set(model,'diag_only', 0);   
+model = lwpr_set(model,'meta', 1);
+model = lwpr_set(model,'meta_rate', 250);
+model = lwpr_set(model,'kernel', 'Gaussian');  
+% model = lwpr_set(model,'update_D', 1);
+
+% Transfer model into mex-internal storage
+model = lwpr_storage('Store', model);
+
+%% Model training
+nmse = zeros(training_steps, 1);
+f = waitbar(0, 'Training model ...');
+for j = 1:training_steps
+   inds = randperm(n);
+
+   mse = 0;
+   for i=1:n
+       waitbar(i/n, f, sprintf('Training (%d / %d) ==> %d / %d ...', ...
+                                j, training_steps, i, n));
+	   [model, yp, ~] = lwpr_update(model,X(inds(i),:)',Y(inds(i),:)');         
+	   mse = mse + (Y(inds(i),:)-yp).^2;
+   end
+
+   nMSE = mse/n/var(Y,1);
+   fprintf(1, '#Data=%d #rfs=%d nMSE=%5.3f\n', ...
+           lwpr_num_data(model), lwpr_num_rfs(model), nMSE);
+   %if exist('fflush') % for Octave output only
+   %   fflush(1);
+   %end   
+   nmse(j) = nMSE;
+end
+close(f);
+toc
+
+%% Write model to mat file
+save(model_file, 'model');
+% load(model_file, 'model');
 
 %% Model predictions
 tic
@@ -134,41 +134,6 @@ plot(log(nmse));
 xlabel('Iteration');
 ylabel('Log(nMSE)');
 title('nMSE');
-
-% -------------------------------------------------------------------------
-function X = makegrid(grid_min, grid_max, N, ndim)
-% [X]=makegrid(grid_min, grid_max, N, ndim) creates an n-dimensional
-% meshgrid from equally spaced axes with min-max values given in the 
-% arrays grid_min and grid_max and number of points in array N.
-grid_data = {};
-for d = 1:ndim
-    grid_data{d} = linspace(grid_min(d), grid_max(d), N(d));
-end
-if ndim == 2
-    [grid_x, grid_vx] = ndgrid(grid_data{:});
-    grid_x = permute(grid_x, [2, 1]);  % ngrid -> meshgrid
-    grid_vx = permute(grid_vx, [2, 1]);
-    X = [grid_x(:), grid_vx(:)];
-elseif ndim == 4
-    [grid_x, grid_y, grid_vx, grid_vy] = ndgrid(grid_data{:});
-    grid_x = permute(grid_x, [2, 1, 3, 4]);  % ngrid -> meshgrid
-    grid_y = permute(grid_y, [2, 1, 3, 4]);
-    grid_vx = permute(grid_vx, [2, 1, 3, 4]);
-    grid_vy = permute(grid_vy, [2, 1, 3, 4]);
-    X = [grid_x(:), grid_y(:), grid_vx(:), grid_vy(:)]; 
-else
-    error('Undefined grid creation for dimension !');
-end
-
-
-function Y = makevalues(values, ndim)
-if ndim == 2
-    Y = reshape(values(:, :, end), [], 1);
-elseif ndim == 4
-    Y = reshape(values(:, :, :, :, end), [], 1);
-else
-    error('Undefined values creation for dimension !');
-end
 
 % -------------------------------------------------------------------------
 function [X,Y,Z] = makesurf(data,nx)
