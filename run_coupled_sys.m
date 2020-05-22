@@ -4,8 +4,8 @@ function run_coupled_sys()
 ndim = 2;
 N = [41; 41; 21; 21];
 
-x_min = -20;
-x_max = 20;
+x_min = -30;
+x_max = 30;
 v_min_robot = -2.0; 
 v_max_robot = 2.0;
 a_max_robot = 2;
