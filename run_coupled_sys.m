@@ -6,10 +6,16 @@ N = [41; 41; 21; 21];
 
 x_min = -20;
 x_max = 20;
-v_min_robot = -2; 
-v_max_robot = 2;
+v_min_robot = -2.0; 
+v_max_robot = 2.0;
 a_max_robot = 2;
-v_max_single = 4;
+v_max_ped = 2.5;
+
+t0 = 0;
+tMax = 6.0;
+dt = 0.4;
+
+output_file = sprintf("../reachability/%dD.mat", ndim);
 
 %% Grid (isotropic)
 grid_min = [ones(ndim,1) * x_min; ones(ndim,1) * v_min_robot]';
@@ -23,16 +29,13 @@ R = 1;
 data0 = shapeCylinder(g, ndim+1:2*ndim, zeros(ndim), R);
 
 %% time vectors
-t0 = 0;
-tMax = 2.0;
-dt = 0.4;
 tau = t0:dt:tMax;
 
 %% problem parameters
 
 % input and disturbance bounds
 aMax = a_max_robot;
-dMax = ones(ndim) * v_max_single;
+dMax = ones(ndim) * v_max_ped;
 
 % control trying to min or max value function?
 uMode = 'max';
@@ -66,7 +69,10 @@ HJIextraArgs.visualize.deleteLastPlot = true; %delete previous plot
 [gradients, ~, ~] = computeGradients(g, value_function);
 
 %% Write results to mat file
-output_file = sprintf("../reachability/%dD.mat", ndim);
+params = struct('v_max_ped', v_max_ped, ...
+                'v_max_robot', v_max_robot, ...
+                'a_max_robot', a_max_robot);
+            
 save(output_file, 'grid_min', 'grid_max', 'N', ...
-    'value_function', 'gradients', 'tau');
+    'value_function', 'gradients', 'tau', 'params');
 end
